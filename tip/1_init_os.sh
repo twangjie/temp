@@ -1,12 +1,11 @@
 #!/bin/bash
-#title           : 1_init_os.sh
-#description     : 初始化操作系统，用于安装Hadoop
-#author		 	 : 王杰
-#date            : 20170221
-#version         : 1.0
-#usage		 	 : sh 1_init_os.sh
-#notes           :
-#bash_version    :
+#title      : 1_init_os.sh
+#description: 初始化操作系统，用于安装Hadoop
+#author     : 王杰
+#date       : 20170221
+#version    : 1.0
+#usage      : sh 1_init_os.sh
+#notes      :
 #==============================================================================
 
 currentTime=`date "+%Y%m%d%H%M%S"`

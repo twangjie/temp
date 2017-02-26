@@ -1,12 +1,11 @@
 #!/bin/bash
-#title           : 2_init_storage.sh
-#description     : 初始化除操作系统所在磁盘之外的所有磁盘，并格式化成ext4.
-#author		 	 : 王杰
-#date            : 20170221
-#version         : 1.0
-#usage		 	 : sh 2_init_storage.sh
-#notes           :
-#bash_version    :
+#title          : 2_init_storage.sh
+#description    : 初始化除操作系统所在磁盘之外的所有磁盘，并格式化成ext4.
+#author         : 王杰
+#date           : 20170221
+#version        : 1.0
+#usage          : sh 2_init_storage.sh
+#notes          :
 #==============================================================================
 LANG="en_US.UTF-8"
 LANGUAGE="en_US:en"
@@ -45,8 +44,8 @@ fi
 i=1
 while read line; do 
     if [ "$line" != "$osdisk" ]; then
-		echo 
-		echo "Y" | parted  $line mklabel gpt
+        echo 
+        echo "Y" | parted  $line mklabel gpt
         echo "y" | mkfs.ext4 -m 0 -O dir_index,extent,sparse_super $line
         tune2fs -m 0 $line
         
@@ -62,6 +61,9 @@ while read line; do
 done < disks.txt
 
 df -h
+
+rm -f osdisk.txt
+rm -f disks.txt
 
 echo 
 echo "Storage disks initialization finished..."
