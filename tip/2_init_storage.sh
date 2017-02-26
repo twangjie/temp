@@ -1,6 +1,6 @@
 #!/bin/bash
 #title          : 2_init_storage.sh
-#description    :  初始化除操作系统所在磁盘之外的所有磁盘，并格式化成ext4.
+#description    : 初始化除操作系统所在磁盘之外的所有磁盘，并格式化成ext4.
 #author         : 王杰
 #date           : 20170221
 #version        : 1.0
