@@ -26,7 +26,7 @@ echo $splitter
 osdisk=`mount |grep /dev/sd | grep 'on / ' |awk '{print substr($1,1,8)}'`
 echo $osdisk > osdisk.txt
 
-# 获取所有大于32GB的磁盘，并按容量升序排列
+# 获取所有大于32GB的磁盘，并按磁盘号升序排列
 fdisk -l |grep ' /dev/' | awk -F ' ' '{if($5>32000000000){print $0}}' | sort -k2 -n > disks.txt
 
 echo
