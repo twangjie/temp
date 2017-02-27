@@ -1,0 +1,132 @@
+#! /bin/bash
+#
+# Comments to support chkconfig
+# chkconfig: 2345 90 10
+# description: TIP REST service script
+#
+# Source function library.
+if [ -f /etc/rc.d/init.d/functions ]; then
+  . /etc/rc.d/init.d/functions
+elif [ -f /lib/lsb/init-functions ]; then
+  . /lib/lsb/init-functions
+  . /etc/rc.status
+  rc_reset
+fi
+
+### Default variables
+pidfile="/var/run/RESTServer.pid"
+
+RETVAL=0
+
+CATALINA_HOME="/opt/dccs/tip/apache-tomcat-8.5.5"
+
+#JAVA_HOME=/usr/java/jdk1.7.0_67-cloudera
+#JAVA_HOME=/usr/java/jdk1.8.0_60
+JAVA_HOME=/usr/java/latest
+#MYJSVC_HOME=$(pwd)
+MYJSVC_HOME=/opt/dccs/tip/RESTS
+DAEMON_HOME=$MYJSVC_HOME
+MYJSVC_USER=root
+
+TMP_DIR=/var/tmp/RESTServer
+
+#CLASSPATH=$MYJSVC_HOME/commons-daemon-1.0.15.jar:$MYJSVC_HOME/RESTServer.jar:$MYJSVC_HOME/lib/*.jar
+CLASSPATH=$MYJSVC_HOME/commons-daemon-1.0.15.jar:$MYJSVC_HOME/RESTServer.jar
+DAEMON_CLASS=com.dccs.bdbase.server.RESTServer
+
+RESTSERVER_CONFIG=$MYJSVC_HOME/config/Server.properties
+LOG4J_CONFIG=$MYJSVC_HOME/config/log4j.properties
+HADOOP_NATIVE_LIB=/opt/cloudera/parcels/CDH/lib/hadoop/lib/native
+
+chmod 755 $DAEMON_HOME/jsvc
+
+function check_library {
+    if [[ ! -e $DAEMON_HOME/RESTServer.jar ]]; then
+    echo "ERROR- RESTServer.jar must exist; link it from RESTServer-{version}.jar"
+    exit 1
+  fi
+}
+
+local_checkpid() {
+  local local_pidfile="$1"
+
+  if [ ! -f $local_pidfile ]; then
+    return 1
+  fi
+ 
+  return 0
+}
+
+
+function start_rest_server {
+    echo "start_rest_server"
+    
+    local_checkpid $pidfile
+    if [ $? = 0 ]; then
+        echo "$prog is already running"
+        exit 0
+    fi
+    
+    check_library
+    
+    $DAEMON_HOME/jsvc -user $MYJSVC_USER -home $JAVA_HOME \
+    -Djava.io.tmpdir=$TMP_DIR \
+    -Drestserver.config.file=$RESTSERVER_CONFIG \
+    -Dlog4j.properties.file=$LOG4J_CONFIG \
+    -Drestserver.logging.root=$MYJSVC_HOME/log \
+    -Djava.library.path=$HADOOP_NATIVE_LIB \
+    -wait 10 -pidfile  $pidfile -errfile '&1' -cp $CLASSPATH $DAEMON_CLASS
+    
+    RETVAL=$?
+}
+
+function stop_rest_server {
+    echo "stop_rest_server"
+    
+    $DAEMON_HOME/jsvc -stop -pidfile $pidfile $DAEMON_CLASS
+    
+    rm -f $pidfile
+    
+    RETVAL=$?
+}
+
+function start_tip_server {
+    if [ -f $CATALINA_HOME/bin/startup.sh ];
+    then
+        echo $"Starting tip"
+        $CATALINA_HOME/bin/startup.sh
+        RETVAL=$?
+    fi
+}
+
+function stop_tip_server {
+    if [ -f $CATALINA_HOME/bin/shutdown.sh ];
+    then
+        echo $"Stopping tip2"
+        $CATALINA_HOME/bin/shutdown.sh
+        RETVAL=$?
+    fi
+    kill -9 `ps -ef |grep '/opt/dccs/tip/apache-tomcat' |grep -v grep |awk {'print $2'}`
+}
+
+
+case "$1" in
+start)
+start_tip_server
+start_rest_server
+;;
+stop)
+stop_tip_server
+stop_rest_server
+;;
+restart)
+stop_tip_server
+stop_rest_server
+start_tip_server
+start_rest_server
+;;
+
+*)
+echo "Usage service tip start/stop/restart"
+exit 1;;
+esac

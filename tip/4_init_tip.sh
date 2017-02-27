@@ -15,3 +15,13 @@ LANGUAGE="en_US:en"
 
 alias cp='cp'
 clear
+
+# 初始化nginx代理
+
+
+# 初始化tip MySQL数据库
+
+
+# 初始化tip Impala数据库
+
+# 初始化HBase数据库
