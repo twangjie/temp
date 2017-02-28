@@ -57,42 +57,6 @@ if [ -f $bondcfg ]; then
     sed -i 's/BOOTPROTO=.*/BOOTPROTO=static/' $bondcfg 
 fi
 
-if false; then
-
-    # 修改网络配置
-
-    # 备份原有网络配置
-
-    pushd /etc/sysconfig/network-scripts
-    tar -czf $backupdir/network-scripts-$currentTime.tar.gz .
-    popd
-
-    # 网卡列表
-    devs=`nmcli dev status |awk 'BEGIN{getline a}{print a;a=$0}' | awk 'NR>1{print $1}'`
-    echo $devs
-
-    # 创建bond0
-    nmcli conn add type bond con-name bond0 ifname bond0 mode 0
-
-    # 创建slave
-    echo $devs | awk '{i=1; while(i <= NF) {print "nmcli conn add type bond-slave con-name bond-slave-"$i" ifname "$i" master bond0";i++}}' > cmd.sh
-
-    sh cmd.sh
-    rm -f cmd.sh
-
-    ipaddr=""
-    while [ "$ipaddr" == "" ]; do
-        echo " *** Please input the IP address: *** "
-        read -p "[e.g.: 192.168.36.101]: " ipaddr
-    done
-
-    # 修改bond0的网卡地址
-    nmcli conn mod bond0 ipv4.addresses "$ipaddr/24" 
-    nmcli conn mod bond0 ipv4.method manual
-    systemctl restart network
-
-fi
-
 echo "OS initialized, reboot in 10 seconds..."
 sleep 10
 
