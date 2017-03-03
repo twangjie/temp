@@ -15,6 +15,9 @@ LANGUAGE="en_US:en"
 
 alias cp='cp'
 
+rm -f /root/anaconda-ks.cfg
+rm -fr /var/log/anaconda
+
 backupdir=/opt/dccs/bak
 
 mkdir -p $backupdir
@@ -65,8 +68,9 @@ echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdom
 echo "#::1         localhost localhost.localdomain localhost6 localhost6.localdomain6" >> $hostfile
 for((i=101;i<=120;i++));do echo $ipprefix.$i"    "host$i.tip.dccs.com.cn"    "host$i >> $hostfile; done ;
 
+#sed -i '/.*\/opt\/dccs\/install\/1_init_os.sh.*/d' /etc/rc.d/rc.local
 
-echo "OS initialized, reboot in 10 seconds..."
-sleep 10
+echo "OS initialized, reboot in 5 seconds..."
+sleep 5
 
 reboot
