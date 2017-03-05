@@ -62,7 +62,8 @@ fi
 
 # 初始化hosts文件
 hostfile=/etc/hosts
-ipprefix=`ip a |grep 192.168 |awk 'split($2,a,"."){print a[1]"."a[2]"."a[3]}'`
+#ipprefix=`ip a |grep 192.168 |awk 'split($2,a,"."){print a[1]"."a[2]"."a[3]}'`
+ipprefix=`cat ip.txt |awk 'split($0,a,"."){print a[1]"."a[2]"."a[3]}'`
 
 echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4" > $hostfile
 echo "#::1         localhost localhost.localdomain localhost6 localhost6.localdomain6" >> $hostfile
