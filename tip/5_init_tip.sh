@@ -72,9 +72,6 @@ if [ "$temp" != "" ]; then
     master_ip=$temp
 fi
 
-#INSERT INTO scm.`USERS` VALUES(1000,'__cloudera_internal_user__TIP', 'a1edda288e2a4be0a002c594ead6e5da2b9a633a1784a756a66a3db06c907921', '230065777681863511', 1, 1);
-#INSERT INTO scm.`USER_ROLES` VALUES(1000,1000,'ROLE_ADMIN',0);
-
 # 初始化Mysql tip数据库连接信息
 echo ""
 echo $splitter
@@ -85,6 +82,18 @@ read -p "Please input the database host ip for tip restful serivce[default: 127.
 if [ "$temp" != "" ]; then
     mysql_dbhost=$temp
 fi
+
+# cloudera manager 增加用户
+scm_update_sql_file=$instroot/tip/scm_update.sql
+
+echo "use scm;" > $scm_update_sql_file
+echo "INSERT INTO scm.\`USERS\` VALUES(1000,'__cloudera_internal_user__TIP', 'a1edda288e2a4be0a002c594ead6e5da2b9a633a1784a756a66a3db06c907921', '230065777681863511', 1, 1);" >> $scm_update_sql_file
+echo "INSERT INTO scm.\`USER_ROLES\` VALUES(1000,1000,'ROLE_ADMIN',0);" >> $scm_update_sql_file
+
+mysql -uscm -pscm -h$mysql_dbhost < $instroot/tip/scm_update.sql
+
+echo ""
+echo $splitter
 
 config_file=/opt/dccs/tip/config.properties
 
@@ -113,6 +122,26 @@ read -p "Please input the impala deamon port for tip restful serivce[default: 21
 if [ "$temp" != "" ]; then
     impala_port=$temp
 fi
+
+# 初始化HBASE表
+hbase shell < $instroot/tip/hbase-init.cmd
+
+#初始化Impala表
+hive -f $instroot/tip/tip-impala-cache.sql
+impala-shell -f $instroot/tip/tip-impala.sql
+impala-shell -q 'invalidate metadata;'
+
+#初始化flume
+sudo -u hdfs hadoop fs mkdir -p  /flume/tip
+sudo -u hdfs hadoop fs -chown -R impala:impala /flume/tip
+
+rm -fr /data/flume
+mkdir -p /data/flume
+chown -R impala:impala /data/flume
+
+rm -fr /var/log/flume-ng
+mkdir -p /var/log/flume-ng
+chown -R impala:impala /var/log/flume-ng
 
 
 # 初始化HBase连接信息
@@ -144,7 +173,6 @@ echo "update config set val='tip' where \`key\`='nesf.datasource.task.password';
 
 mysql -utip -ptip -h$mysql_dbhost < $tip_update_sql_file
 rm -f $tip_update_sql_file
-
 
 cd RESTS
 
@@ -196,11 +224,27 @@ while [ "$temp" == "" ]; do
     read -p "Please input the TIP server ip,split by \",\" [e.g.: 192.168.36.101,192.168.36.102]: " temp
 done
 
-echo "upstream rests2 {" > $temp_file
-echo $temp | awk '{split($0,s,",");{for(i in s)print "server " s[i] ":58080 max_fails=3 fail_timeout=5s weight=4;"}}' >> $temp_file
-echo "keepalive 10;" >> $temp_file
+echo "upstream restmgr {" > $temp_file
+echo $temp | awk '{split($0,s,",");{for(i in s)print "    server " s[i] ":22345 max_fails=3 fail_timeout=5s weight=4;"}}' >> $temp_file
+echo "    keepalive 10;" >> $temp_file
 echo "}" >> $temp_file
 echo "" >> $temp_file
+
+echo "upstream rests2 {" >> $temp_file
+echo $temp | awk '{split($0,s,",");{for(i in s)print "    server " s[i] ":58080 max_fails=3 fail_timeout=5s weight=4;"}}' >> $temp_file
+echo "    keepalive 10;" >> $temp_file
+echo "}" >> $temp_file
+echo "" >> $temp_file
+
+echo "upstream cm {" >> $temp_file
+echo $master_ip | awk '{split($0,s,",");{for(i in s)print "    server " s[i] ":7180 max_fails=3 fail_timeout=5s weight=4;"}}' >> $temp_file
+#echo "    server $master_ip:7180 max_fails=3 fail_timeout=5s weight=4;" >> $temp_file
+echo "    keepalive 10;" >> $temp_file
+echo "}" >> $temp_file
+echo "" >> $temp_file
+
+cat $temp_file
+
 cat nginx/conf.d/http/tip.conf >> $temp_file
 cat $temp_file > /etc/nginx/conf.d/http/tip.conf
 rm -f $temp_file

@@ -139,7 +139,8 @@ function init_master(){
     systemctl start nginx
     
     echo
-    echo "Cloudera Manager(Master) initialize finished"
+    echo "Cloudera Manager(Master) initialize finished, Sleep 30 seconds for cloudera-scm-server..."
+    sleep 30
 }
 
 if [ $masterflag == "Y" ]; then
