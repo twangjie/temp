@@ -26,13 +26,14 @@ done
 
 splitter="=============================================================================="
 backupdir=/opt/dccs/bak
+instroot=/opt/dccs/install
 
 #复制mysql jdbc驱动
 mkdir -p /usr/share/java
 cp -a mysql/mysql-connector-java-5.1.34-bin.jar /usr/share/java/mysql-connector-java.jar
 
-if [ ! -d "/opt/dccs/install/cdh/cm" ]; then  
-    pushd /opt/dccs/install/cdh
+if [ ! -d "$instroot/cdh/cm" ]; then  
+    pushd $instroot/cdh
     tar -xf cm5*-centos7.tar.gz
     popd
 fi
@@ -45,7 +46,7 @@ cp -a /etc/yum.repos.d $backupdir/
 rm -fr /etc/yum.repos.d/*
 cp -a yum.repos.d/* /etc/yum.repos.d/
 
-echo "/opt/dccs/install/CentOS7-TIP.iso /media/CentOS iso9660 ro,relatime 0 0" >> /etc/fatab
+echo "$instroot/CentOS7-TIP.iso /media/CentOS iso9660 ro,relatime 0 0" >> /etc/fatab
 
 yum clean all
 
@@ -112,10 +113,18 @@ function init_master(){
     
     echo "copy cloudera cdh parcels..."
     mkdir -p /opt/cloudera/parcel-repo/
-    cp -a /opt/dccs/install/cdh/parcel-repo/* /opt/cloudera/parcel-repo/
+    cp -a $instroot/cdh/parcel-repo/* /opt/cloudera/parcel-repo/
+    echo    
+    echo $splitter
     
-    echo
+    # 配置nginx
+    rm -fr /etc/nginx/conf.d
+    rm -f /etc/nginx/nginx.conf
+    cp -a $instroot/nginx/* /etc/nginx
+    rm -f /etc/nginx/conf.d/http/flumeproxy.conf
+    rm -f /etc/nginx/conf.d/http/tip.conf
     
+    echo    
     echo $splitter
     
     cp -a mysql/my.cnf /etc/
@@ -126,17 +135,18 @@ function init_master(){
     chown mysql:mysql -R /var/lib/mysql
     popd
 
-    systemctl start mariadb
+    systemctl restart mariadb
 
     echo $splitter
     
     JAVA_HOME=/usr/java/latest
     
+    mysql -uroot -pDccs12345. < mysql/grant.sql
     mysql -uroot -pDccs12345. < mysql/cm.sql
     /usr/share/cmf/schema/scm_prepare_database.sh mysql -h 127.0.0.1 -uroot -pDccs12345. --scm-host 127.0.0.1 scm scm scm --force
     
-    systemctl start cloudera-scm-server
-    systemctl start nginx
+    systemctl restart cloudera-scm-server
+    systemctl restart nginx
     
     echo
     echo "Cloudera Manager(Master) initialize finished, Sleep 30 seconds for cloudera-scm-server..."

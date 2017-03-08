@@ -132,7 +132,7 @@ impala-shell -f $instroot/tip/tip-impala.sql
 impala-shell -q 'invalidate metadata;'
 
 #初始化flume
-sudo -u hdfs hadoop fs mkdir -p  /flume/tip
+sudo -u hdfs hadoop fs -mkdir -p  /flume/tip
 sudo -u hdfs hadoop fs -chown -R impala:impala /flume/tip
 
 rm -fr /data/flume

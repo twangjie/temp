@@ -41,10 +41,21 @@ echo "vm.swappiness=10" >> /etc/sysctl.conf
 # 禁用透明大页面
 cp -r /sys/kernel/mm/transparent_hugepage $backupdir/
 
-echo "echo never > /sys/kernel/mm/transparent_hugepage/defrag " >> /etc/rc.local
-echo "echo never > /sys/kernel/mm/transparent_hugepage/enabled" >> /etc/rc.local
-echo never > /sys/kernel/mm/transparent_hugepage/defrag
-echo never > /sys/kernel/mm/transparent_hugepage/enabled
+if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+   echo never > /sys/kernel/mm/transparent_hugepage/enabled
+fi
+if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
+   echo never > /sys/kernel/mm/transparent_hugepage/defrag
+fi
+
+echo "" >> /etc/rc.d/rc.local
+echo "if test -f /sys/kernel/mm/transparent_hugepage/enabled; then" >> /etc/rc.d/rc.local
+echo "   echo never > /sys/kernel/mm/transparent_hugepage/enabled" >> /etc/rc.d/rc.local
+echo "fi" >> /etc/rc.d/rc.local
+echo "if test -f /sys/kernel/mm/transparent_hugepage/defrag; then" >> /etc/rc.d/rc.local
+echo "   echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> /etc/rc.d/rc.local
+echo "fi" >> /etc/rc.d/rc.local
+
 
 # 修改文件打开数限制
 ulimit -n 1048576
