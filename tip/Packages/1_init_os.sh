@@ -38,6 +38,8 @@ sysctl -w vm.swappiness=10
 cp /etc/sysctl.conf $backupdir/
 echo "vm.swappiness=10" >> /etc/sysctl.conf
 
+echo "echo 10 > /proc/sys/vm/swappiness" >> /etc/rc.d/rc.local
+
 # 禁用透明大页面
 cp -r /sys/kernel/mm/transparent_hugepage $backupdir/
 
@@ -56,6 +58,7 @@ echo "if test -f /sys/kernel/mm/transparent_hugepage/defrag; then" >> /etc/rc.d/
 echo "   echo never > /sys/kernel/mm/transparent_hugepage/defrag" >> /etc/rc.d/rc.local
 echo "fi" >> /etc/rc.d/rc.local
 
+chmod +x /etc/rc.d/rc.local
 
 # 修改文件打开数限制
 ulimit -n 1048576
@@ -78,7 +81,7 @@ ipprefix=`cat ip.txt |awk 'split($0,a,"."){print a[1]"."a[2]"."a[3]}'`
 
 echo "127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4" > $hostfile
 echo "#::1         localhost localhost.localdomain localhost6 localhost6.localdomain6" >> $hostfile
-for((i=101;i<=120;i++));do echo $ipprefix.$i"    "host$i.tip.dccs.com.cn"    "host$i >> $hostfile; done ;
+for((i=101;i<=200;i++));do echo $ipprefix.$i"    "host$i.tip.dccs.com.cn"    "host$i >> $hostfile; done ;
 
 #sed -i '/.*\/opt\/dccs\/install\/1_init_os.sh.*/d' /etc/rc.d/rc.local
 

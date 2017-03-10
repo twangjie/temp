@@ -15,14 +15,20 @@ alias cp='cp'
 
 masterflag="N"
 
-while true; do
-    read -p "This node is the master node?(y/n)?" yn
-    case $yn in
-        [Yy]* ) masterflag="Y"; break;;
-        [Nn]* ) break;;
-        * ) echo "Please answer y or n";;
-    esac
-done
+# while true; do
+    # read -p "This node is the master node?(y/n)?" yn
+    # case $yn in
+        # [Yy]* ) masterflag="Y"; break;;
+        # [Nn]* ) break;;
+        # * ) echo "Please answer y or n";;
+    # esac
+# done
+
+# 直接使用host101作为master
+hn=`hostname -s`
+if [ $hn == "host101" ]; then
+    masterflag="Y"
+fi
 
 splitter="=============================================================================="
 backupdir=/opt/dccs/bak
@@ -46,7 +52,10 @@ cp -a /etc/yum.repos.d $backupdir/
 rm -fr /etc/yum.repos.d/*
 cp -a yum.repos.d/* /etc/yum.repos.d/
 
-echo "$instroot/CentOS7-TIP.iso /media/CentOS iso9660 ro,relatime 0 0" >> /etc/fatab
+cp /etc/fstab $backupdir/fstab
+cp /etc/fstab .
+echo "$instroot/CentOS7-TIP.iso /media/CentOS iso9660 ro,relatime 0 0" >> fstab
+cp fstab /etc/fstab
 
 yum clean all
 
@@ -54,27 +63,23 @@ yum clean all
 rpm -Uvh jdk-8u60-linux-x64.rpm
 
 # 安装Cloudera Manager 5 RPMS
+
+yum -y remove cloudera-manager-agent
+yum -y remove cloudera-manager-server
+rm -fr /var/lib/cloudera-*
+
 yum -y install cloudera-manager-agent
 systemctl enable cloudera-scm-agent
 
 echo
 echo
 echo $splitter
-cmserver="127.0.0.1"
+cmserver="host101.tip.dccs.com.cn"
 temp=""
-while [ "$temp" == "" ]; do
-    if [ $masterflag == "Y" ]; then
-        read -p "Please input the external ntp server ip[default: 127.0.0.1]: " temp
-    else
-        read -p "Please input the Cloudera Manager server ip(Master node): " temp
-    fi
-done
 
-ntphost=$temp
-cmserver=$temp
-sed -i 's/server_host=.*/server_host='$cmserver'/' /etc/cloudera-scm-agent/config.ini
+#sed -i 's/server_host=.*/server_host='$cmserver'/' /etc/cloudera-scm-agent/config.ini
 
-systemctl restart cloudera-scm-agent
+systemctl stop cloudera-scm-agent
 
 echo
 # 初始化时间服务
@@ -84,10 +89,9 @@ systemctl enable ntpd
 # 直接使用 Cloudera Manager server节点的ntp服务
 ntphost=$cmserver
 
-cat ntp/ntp-client.conf > /etc/ntp.conf
-sed -i 's/server .*/server '$ntphost'/' /etc/ntp.conf
-
-if [ "$ntphost" != "127.0.0.1" ]; then
+if [ $masterflag != "Y" ]; then
+    cat ntp/ntp-client.conf > /etc/ntp.conf
+    #sed -i 's/server .*/server '$ntphost'/' /etc/ntp.conf
     ntpdate -u $ntphost
     hwclock -w
 fi
@@ -101,6 +105,62 @@ echo $splitter
 
 function init_master(){
     
+    echo
+    echo $splitter
+    
+    temp=""
+    external_ip=""
+    external_netmask="255.255.255.0"
+    external_gateway=""
+    external_dns=""
+    netconf=/etc/sysconfig/network-scripts/ifcfg-bond0
+    cp $netconf $backupdir/
+    
+    read -p "Please input the external ip: " temp
+    if [ "$temp" != "" ]; then
+        external_ip=$temp
+        
+        temp=""
+        read -p "Please input the netmask for external ip $external_ip[default: $external_netmask]: " temp
+        if [ "$temp" != "" ]; then
+            external_netmask=$temp
+        fi
+        
+        temp=""
+        read -p "Please input the gateway for external ip [$external_ip]: " temp
+        if [ "$temp" != "" ]; then
+            external_gateway=$temp
+        fi
+        
+        temp=""
+        read -p "Please input the dns for external ip [$external_ip]: " temp
+        if [ "$temp" != "" ]; then
+            external_dns=$temp
+        fi        
+    fi
+    
+    if [[ "$external_ip" != "" ]] && [[ "$external_netmask" != "" ]]; then
+        echo "IPADDR1=$external_ip" >> $netconf
+        echo "NETMASK1=$external_netmask" >> $netconf
+        
+        if [ "$external_gateway" != "" ];then
+            echo "GATEWAY1=$external_gateway" >> $netconf
+        fi
+        
+        if [ "$external_dns" != "" ];then
+            echo "DNS1=$external_dns" >> $netconf
+        fi
+    fi
+    
+    ntphost="127.0.0.1"
+    read -p "Please input the external ntp server ip[default: 127.0.0.1]: " temp
+    if [ "$temp" != "" ]; then
+        ntphost=$temp
+    fi
+        
+    cat ntp/ntp-server.conf > /etc/ntp.conf
+    sed -i 's/server external/server '$ntphost'/' /etc/ntp.conf
+        
     echo
     echo $splitter    
     yum -y install cloudera-manager-agent cloudera-manager-server nginx mariadb-server
@@ -145,16 +205,19 @@ function init_master(){
     mysql -uroot -pDccs12345. < mysql/cm.sql
     /usr/share/cmf/schema/scm_prepare_database.sh mysql -h 127.0.0.1 -uroot -pDccs12345. --scm-host 127.0.0.1 scm scm scm --force
     
+    mkdir -p /var/lib/cloudera-scm-server
+    chown cloudera-scm:cloudera-scm /var/lib/cloudera-scm-server
+    
     systemctl restart cloudera-scm-server
     systemctl restart nginx
-    
+        
     echo
     echo "Cloudera Manager(Master) initialize finished, Sleep 30 seconds for cloudera-scm-server..."
     sleep 30
 }
 
 if [ $masterflag == "Y" ]; then
-    init_master
+    init_master    
 fi
 
 echo "Cloudera Manager Agent initialize finished..."

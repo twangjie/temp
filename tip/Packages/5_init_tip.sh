@@ -35,7 +35,7 @@ chmod 755 *
 ./dunst
 ./dinst
 cd ..
-cp haspvlib_111426.so /var/hasplm
+cp haspvlib_111426.so /var/hasplm/
 popd
 
 echo ""
@@ -66,22 +66,15 @@ echo ""
 echo $splitter
 master_ip="127.0.0.1"
 temp=""
-read -p "Please input the master's ip: " temp
-
-if [ "$temp" != "" ]; then
-    master_ip=$temp
-fi
+while [ "$temp" == "" ]; do
+    read -p "Please input the master\'s ip [e.g.: 192.168.36.101 ]: " temp
+done
+master_ip=$temp
 
 # 初始化Mysql tip数据库连接信息
 echo ""
 echo $splitter
-mysql_dbhost="127.0.0.1"
-temp=""
-read -p "Please input the database host ip for tip restful serivce[default: 127.0.0.1]: " temp
-
-if [ "$temp" != "" ]; then
-    mysql_dbhost=$temp
-fi
+mysql_dbhost=$master_ip
 
 # cloudera manager 增加用户
 scm_update_sql_file=$instroot/tip/scm_update.sql
