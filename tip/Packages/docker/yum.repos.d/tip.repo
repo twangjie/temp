@@ -1,0 +1,13 @@
+[c7-media]
+name=CentOS-$releasever - Media
+baseurl=file:///media/CentOS/
+gpgcheck=0
+enabled=1
+gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7
+
+[cm]
+name=Cloudera Manager 5 - Media
+baseurl=file:///opt/dccs/install/cdh/cm/5/
+gpgcheck=0
+enabled=1
+#gpgkey=file:///opt/dccs/install/cdh/cm/RPM-GPG-KEY-cloudera

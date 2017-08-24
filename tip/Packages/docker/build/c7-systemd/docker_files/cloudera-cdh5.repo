@@ -1,0 +1,19 @@
+[centos7]
+# Packages for Cloudera CDH, Version 5, on RedHat or CentOS 7 x86_64           	  
+name=CentOS 7.2.1511
+#baseurl=http://vault.centos.org/7.2.1511/os/x86_64/
+#baseurl=http://109.72.83.61/7.2.1511/os/x86_64/
+#gpgkey=http://109.72.83.61/7.2.1511/os/x86_64/RPM-GPG-KEY-CentOS-7
+baseurl=http://192.168.35.10/CentOS7/
+enabled=1
+gpgcheck=0
+
+[cloudera-cdh]
+# Packages for Cloudera CDH, Version 5, on RedHat or CentOS 7 x86_64           	  
+name=Cloudera CDH
+#baseurl=http://archive.cloudera.com/cdh5/redhat/7/x86_64/cdh/5.11.0/
+baseurl=http://192.168.35.10/cdh/el7/cdh/5.11.0/
+gpgkey=http://archive.cloudera.com/cdh5/redhat/7/x86_64/cdh/RPM-GPG-KEY-cloudera  
+enabled=1
+gpgcheck = 0
+

@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html>
+<head>
+  <style>
+h1 {
+font: normal normal bold 175%sans-serif;
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+color: #f7941c;
+}
+h2, {
+font: normal normal bold 150% font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;color: #f7941c;
+}
+h3, {
+font: normal normal bold 100% font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;color: #f7941c;
+}
+body, {
+font: normal normal normal smaller sans-serif;</font>
+font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+background-color: White;
+Color: Black;
+margin: 16px;
+}
+ul, {
+font: normal normal normal 100%
+font-family: "Times New Roman", Times, serif;
+list-style-type: disc
+list-style-position: outside;
+text-align: left;
+margin: 16px;
+}
+li {
+font: normal normal normal 100%
+font-family: "Times New Roman", Times, serif;
+text-align: left;
+}
+p{
+font-family: "Times New Roman", Times, serif;
+}
+pre{
+font-family: monospace;
+}
+note{
+font-family: "Times New Roman", Times, serif;
+font-size: x-small;
+}
+code {
+font-family: "Courier New", Courier, monospace;
+font-size: 98%;
+}
+a:link {
+text-decoration: none;
+}
+a:visited {
+text-decoration: none;
+}
+  </style>
+
+	<title>Sentinel LDK Patch for US177400: Readme</title>
+</head>
+<body>
+
+<h1>Sentinel<sup>&reg;</sup> LDK Script  for Linux 32-bit Compatibility Packages: Readme</h1>
+<hr align="left">
+
+<p>This document describes a script for   the Linux operating system to resolve the problem of installing 32-bit compatibility packages for the LDK Run-time Environment.</p>
+<h2>Description of the Script</h2>
+<p>The Sentinel LDK Run-time Environment is compatible with 32-bit (x86) Linux operating systems. 32-bit compatibility packages are available that enable the Run-time Environment to operate under a 64-bit Linux operating system. However, each Linux distribution required a different 32-bit compatibility package. The provided script  automates the process of handling the compatibility package. </p>
+<p>The script performs the following steps automatically:</p>
+<ol>
+  <li>Identifies the Linux distribution under which the script is executing.</li>
+  <li>Determines which compatibility package is required.</li>
+  <li>Obtains the required compatibility package from the online repository of the relevant Linux distribution.</li>
+  <li>Installs the compatibility package.</li>
+</ol>
+<h2>Files Provided</h2>
+<p> <strong>install_32bit_compatibility_package_for _x64.sh</strong> - The shell script that performs the functions described above.</p>
+<h2>Supported Linux Distributions</h2>
+<p>Refer to the readme file for the relevant Linux Run-time Environment installer.</p>
+<h2>Prerequisites for Running the Shell Script</h2>
+<ul>
+  <li>Root access is required to install the compatibility package using the shell script. </li>
+  <li>Internet access is required in order to connect with the online repository of the relevant Linux distribution.</li>
+  <li>For Red Hat Enterprise Linux, you may need to register your Linux system with  RHN (Red Hat Network) in order to download the updates from the Red Hat online repository.</li>
+  <li>The script is intended only for 64-bit Linux operating systems.</li>
+</ul>
+<h2>How to Use the Shell Script</h2>
+<p>  To execute the shell script under a Linux 64-bit operating system:</p>
+<ol>
+  <li> Grant execute permission to the shell script.</li>
+  <li>Open a terminal</li>
+  <li>Run the script: 
+    <code>./install_32bit_compatibility_package_for_x64.sh</code></li>
+</ol>
+<h2>Error Messages</h2>
+<p>This section describes possible error returned by the script in case there is limited or no internet connectivity.</p>
+<table width="200" border="1">
+  <tr>
+    <th scope="col">Linux Distribution</th>
+    <th scope="col"><div align="left">Error Messages</div></th>
+  </tr>
+  <tr>
+    <td>Cent OS</td>
+    <td><kbd>Loaded plugins: fastestmirror, refresh-packagekit, security<br>
+      Loading mirror speeds from cached hostfile<br>
+      * base: mirror.dhakacom.com<br>
+      * extras: mirror.dhakacom.com<br>
+      * updates: mirror.dhakacom.com<br>
+      http://mirror.dhakacom.com/centos/6.4/updates/x86_64/repodata/2530c520eeeb790afd2d3ebcfd7534d0003751fc030ab2f8264f290e2632bb30-primary.sqlite.bz2: [Errno 14] PYCURL ERROR 6 - &quot;Couldn't resolve host 'mirror.dhakacom.com'&quot;<br>
+      Trying other mirror.<br>
+    Error: failure: repodata/2530c520eeeb790afd2d3ebcfd7534d0003751fc030ab2f8264f290e2632bb30-primary.sqlite.bz2 from updates: [Errno 256] No more mirrors to try.</kbd></td>
+  </tr>
+  <tr>
+    <td>RedHat EL</td>
+    <td><p><kbd>Loaded plugins: product-id, refresh-packagekit, rhnplugin, security, subscription-manager<br>
+      Updating certificate-based repositories.<br>
+      Unable to read consumer identity<br>
+      There was an error communicating with RHN.<br>
+      RHN channel support will be disabled.<br>
+      Error communicating with server. The message was:<br>
+      Name or service not known<br>
+      Setting up Install Process<br>
+      No package glibc.i686 available.<br>
+      Error: Nothing to do</kbd><br>
+      <kbd><br>
+      </kbd>If the system is not registered with RHN, the following error message may occur  while installing the 32-bit compatibility package:<br>
+      <kbd><br>
+        Loaded plugins: product-id, refresh-packagekit, security, subscription-manager<br>
+        Updating certificate-based repositories.Unable to read consumer identity<br>
+        Setting up Install Process<br>
+        No package glibc.i686 available.<br>
+    Error: Nothing to do</kbd></p></td>
+  </tr>
+  <tr>
+    <td>Open SuSE</td>
+    <td><kbd>Media source 'http://download.opensuse.org/distribution/12.2/repo/oss/' does not contain the desired medium<br>
+      Abort, retry, ignore? [a/r/i/?] (a): r<br>
+      Retrieving: glibc-32bit-2.15-22.6.4.x86_64.rpm ................................................................................................[error]<br>
+      Download (curl) error for 'http://download.opensuse.org/distribution/12.2/repo/oss/suse/x86_64/glibc-32bit-2.15-22.6.4.x86_64.rpm':<br>
+      Error code: Connection failed<br>
+    Error message: Could not resolve host: download.opensuse.org; Unknown error</kbd></td>
+  </tr>
+  <tr>
+    <td>Ubuntu LTS Server</td>
+    <td><kbd>Err http://in.archive.ubuntu.com/ubuntu/ lucid-updates/universe ia32-libs 2.7ubuntu26.1<br>
+      Could not resolve 'in.archive.ubuntu.com'<br>
+      Err http://security.ubuntu.com/ubuntu/ lucid-security/universe ia32-libs 2.7ubuntu26.1<br>
+      Could not resolve 'security.ubuntu.com'<br>
+      Failed to fetch http://security.ubuntu.com/ubuntu/pool/universe/i/ia32-libs/ia32-libs_2.7ubuntu26.1_amd64.deb Could not resolve 'security.ubuntu.com'<br>
+    E: Unable to fetch some archives, maybe run apt-get update or try with --fix-missing?</kbd></td>
+  </tr>
+  <tr>
+    <td>Debian</td>
+    <td><kbd>Err http://ftp.us.debian.org/debian/ stable/main ia32-libs amd64 20130215<br>
+      Something wicked happened resolving 'ftp.us.debian.org:http' (-5 - No address associated with hostname)<br>
+      Failed to fetch http://ftp.us.debian.org/debian/pool/main/i/ia32-libs/ia32-libs_20130215_amd64.deb Something wicked happened resolving 'ftp.us.debian.org:http' (-5 - No address associated with hostname)<br>
+    E: Unable to fetch some archives, maybe run apt-get update or try with --fix-missing?</kbd></td>
+  </tr>
+</table>
+<p>&nbsp;</p>
+
+
+<p><font face="Palatino Linotype" color="#000000">&copy; Gemalto 2016. All rights reserved.  Gemalto, the Gemalto logo, are trademarks and service marks of Gemalto and are  registered in certain countries.<br>
+  </font></p>
+<div align="right"><font size="-1">DocID 194 Revision 1609-1</font></div>
+
+</body>
+</html>

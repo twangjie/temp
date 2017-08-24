@@ -1,0 +1,55 @@
+#! /bin/bash
+### BEGIN INIT INFO
+# Required-Start:    $docker
+# Required-Stop:     $docker
+#
+# Comments to support chkconfig
+# chkconfig: 2345 90 10
+# description: TIP Docker service script
+#
+### END INIT INFO
+
+# Source function library.
+if [ -f /etc/rc.d/init.d/functions ]; then
+  . /etc/rc.d/init.d/functions
+elif [ -f /lib/lsb/init-functions ]; then
+  . /lib/lsb/init-functions
+  . /etc/rc.status
+  rc_reset
+fi
+
+function start_tip_server {
+
+    if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
+       echo never > /sys/kernel/mm/transparent_hugepage/enabled
+    fi
+    
+    if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
+       echo never > /sys/kernel/mm/transparent_hugepage/defrag
+    fi
+    
+    echo 10 > /proc/sys/vm/swappiness
+
+    /bin/sh /opt/dccs/tip/start_docker_containers.sh
+}
+
+function stop_tip_server {
+    docker stop $(docker ps -q -f name=tip)
+}
+
+case "$1" in
+start)
+start_tip_server
+;;
+stop)
+stop_tip_server
+;;
+restart)
+stop_tip_server
+start_tip_server
+;;
+
+*)
+echo "Usage service tip start/stop/restart"
+exit 1;;
+esac

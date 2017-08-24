@@ -52,10 +52,10 @@ cp -a /etc/yum.repos.d $backupdir/
 rm -fr /etc/yum.repos.d/*
 cp -a yum.repos.d/* /etc/yum.repos.d/
 
-cp /etc/fstab $backupdir/fstab
-cp /etc/fstab .
-echo "$instroot/CentOS7-TIP.iso /media/CentOS iso9660 ro,relatime 0 0" >> fstab
-cp fstab /etc/fstab
+#cp /etc/fstab $backupdir/fstab
+#cp /etc/fstab .
+#echo "$instroot/CentOS7-TIP.iso /media/CentOS iso9660 ro,relatime 0 0" >> fstab
+#cp fstab /etc/fstab
 
 yum clean all
 
@@ -140,22 +140,24 @@ function init_master(){
     fi
     
     if [[ "$external_ip" != "" ]] && [[ "$external_netmask" != "" ]]; then
-        echo "IPADDR1=$external_ip" >> $netconf
-        echo "NETMASK1=$external_netmask" >> $netconf
+        echo "IPADDR2=$external_ip" >> $netconf
+        echo "NETMASK2=$external_netmask" >> $netconf
         
         if [ "$external_gateway" != "" ];then
-            echo "GATEWAY1=$external_gateway" >> $netconf
+            echo "GATEWAY2=$external_gateway" >> $netconf
         fi
         
         if [ "$external_dns" != "" ];then
-            echo "DNS1=$external_dns" >> $netconf
+            echo "DNS2=$external_dns" >> $netconf
         fi
     fi
     
     ntphost="127.0.0.1"
-    read -p "Please input the external ntp server ip[default: 127.0.0.1]: " temp
-    if [ "$temp" != "" ]; then
-        ntphost=$temp
+    if [[ "$external_ip" != "" ]] && [[ "$external_netmask" != "" ]]; then
+        read -p "Please input the external ntp server ip[default: 127.0.0.1]: " temp
+        if [ "$temp" != "" ]; then
+            ntphost=$temp
+        fi
     fi
         
     cat ntp/ntp-server.conf > /etc/ntp.conf

@@ -27,6 +27,7 @@ JAVA_HOME=/usr/java/latest
 MYJSVC_HOME=/opt/dccs/tip/RESTS
 DAEMON_HOME=$MYJSVC_HOME
 MYJSVC_USER=root
+LOGGING_ROOT=/var/log/tip
 
 TMP_DIR=/var/tmp/RESTServer
 
@@ -69,12 +70,17 @@ function start_rest_server {
     
     check_library
     
+    if [ ! -d $LOGGING_ROOT/RESTServer ];  then
+        mkdir -p $LOGGING_ROOT/RESTServer
+    fi
+    
     $DAEMON_HOME/jsvc -user $MYJSVC_USER -home $JAVA_HOME \
     -Djava.io.tmpdir=$TMP_DIR \
     -Drestserver.config.file=$RESTSERVER_CONFIG \
     -Dlog4j.properties.file=$LOG4J_CONFIG \
-    -Drestserver.logging.root=$MYJSVC_HOME/log \
+    -Drestserver.logging.root=$LOGGING_ROOT/RESTServer \
     -Djava.library.path=$HADOOP_NATIVE_LIB \
+    -Djna.library.path=$MYJSVC_HOME \
     -wait 10 -pidfile  $pidfile -errfile '&1' -cp $CLASSPATH $DAEMON_CLASS
     
     RETVAL=$?
@@ -91,6 +97,11 @@ function stop_rest_server {
 }
 
 function start_tip_server {
+
+    if [ ! -d $LOGGING_ROOT/tip ];  then
+        mkdir -p $LOGGING_ROOT/tip
+    fi
+    
     if [ -f $CATALINA_HOME/bin/startup.sh ];
     then
         echo $"Starting tip"

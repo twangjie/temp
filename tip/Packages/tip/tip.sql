@@ -62,8 +62,8 @@ CREATE TABLE `config` (
 INSERT INTO `config` (`key`,`val`,`comment`) VALUES 
  ('dccs.reset.config.hbase.zookeeper.property.clientport','2181','hbase service port'),
  ('dccs.reset.config.hbase.zookeeper.quorum','192.168.35.103','hbase service ip address'),
- ('dccs.reset.config.impala.jdbc.cachetable.expire','86400','Query cache expire time'),
- ('dccs.reset.config.impala.jdbc.cachetable.limit','10000000','Query cache limit'),
+ ('dccs.reset.config.impala.jdbc.cachetable.expire','600','Query cache expire time'),
+ ('dccs.reset.config.impala.jdbc.cachetable.limit','2000000','Query cache limit'),
  ('dccs.reset.config.impala.jdbc.dbname','tip','impala vehicle pass db name'),
  ('dccs.reset.config.impala.jdbc.host','192.168.35.101','Impala host'),
  ('dccs.reset.config.impala.jdbc.port','21051','Impala port'),
@@ -82,11 +82,11 @@ INSERT INTO `config` (`key`,`val`,`comment`) VALUES
  ('nesf.datasource.task.driverClassName','com.mysql.jdbc.Driver',NULL),
  ('nesf.datasource.task.password','tip',NULL),
  ('nesf.datasource.task.testOnBorrow','true',NULL),
- ('nesf.datasource.task.url','jdbc:mysql://192.168.35.103:3306/tip',NULL),
+ ('nesf.datasource.task.url','jdbc:mysql://192.168.35.101:3306/tip',NULL),
  ('nesf.datasource.task.username','tip',NULL),
  ('nesf.datasource.task.validationQuery','SELECT 1',NULL),
-  ('nesf.service.cacheExpire','86400',NULL),
-  ('nesf.service.dataLimit','10000000',NULL),
+  ('nesf.service.cacheExpire','600',NULL),
+  ('nesf.service.dataLimit','2000000',NULL),
   ('nesf.service.hbaseZkQuorum','192.168.35.103',NULL),
   ('nesf.service.hbaseZkClientPort','2181',NULL);
 /*!40000 ALTER TABLE `config` ENABLE KEYS */;

@@ -1,0 +1,272 @@
+#!/bin/bash
+#
+#
+# Install script for HASP SRM runtime environment
+#
+# return codes:
+#   0 - success
+#   1 - missing permissions (must be run as root)
+#   2 - missing source files
+#   4 - unrecognized system
+#   6 - missing RPM/DEB package
+#   7 - failed installation of RPM/DEB
+#   8 - unsupported hardware platform
+
+# Routine for installing VLIB and V2C
+copyvlib_installv2c()
+{
+# copy VLIB
+if [ -f *.so ]; then
+    echo "Copying VLIB..."
+    chmod 555 *.so
+    mkdir /var/hasplm/update
+    cp *.so /var/hasplm/update
+fi
+
+# install V2C
+if test -f *.[vV]2[cC] ; then
+    echo "Installing v2c..."
+    sleep 7
+    ./hasp_update u *.[vV]2[cC]
+fi
+}
+
+# check for root user
+if [ `id -u` -ne 0 ]; then
+    echo "Installer must be run as root" 1>&2
+    echo "Aborting..." 1>&2
+    exit 1
+fi
+
+# check for Linux
+if [ `uname -s` != "Linux" ]; then
+    echo "Not running on Linux!" 1>&2
+    echo "Aborting..." 1>&2
+    exit 4
+fi
+
+# source directory
+src_dir=.
+if [ -n "$1" ]; then
+    src_dir="$1"
+fi
+
+# destination directory
+dest_dir=/usr/sbin
+
+# script directory
+if [ -d /etc/init.d ]; then
+    # System V style
+    script_dir=/etc/init.d
+elif [ -d /etc/rc.d ]; then
+    # BSD style
+    script_dir=/etc/rc.d
+else
+    echo "Unsupported init script system!" 1>&2
+    echo "Aborting..." 1>&2
+    exit 4
+fi
+
+# startup directory
+if [ -d /etc/rc.d ]; then
+    startup_dir=/etc/rc.d
+else
+    startup_dir=/etc
+fi
+
+# check all needed files
+for file_name in aksusbd winehasp hasplmd hasp.rules aksusbd.rc
+do
+    if [ ! -f "$src_dir/$file_name" ]
+    then
+        echo "File '$file_name' missing in '$src_dir'" 1>&2
+        echo "usage: $0 [src_dir]"  1>&2
+        echo "       [src_dir] containing files to be installed" 1>&2
+        echo "                (aksusbd, winehasp, hasplmd, aksusbd.rc hasp.rules)" 1>&2
+        echo "By default, '.' will be used as [src_dir]." 1>&2
+        exit 2
+    fi
+done
+
+if [ `uname -s` != "Linux" ]
+then
+    echo "Not running on Linux!" 1>&2
+    echo "Aborting..." 1>&2
+    exit 4
+fi
+
+# detect hardware platform
+ARCH=`uname -m`
+case "$ARCH" in
+    x86_64)
+        if [ ! -e /lib/ld-linux.so.2 ]
+        then
+            echo "The 32bit support is missing. Please install the x86 compatibility" 1>&2
+            echo "packages required by your distribution and retry the installation." 1>&2
+            echo "See the installation guide for more details." 1>&2
+            echo "Aborting..." 1>&2
+            exit 8
+        fi
+        ;;
+    i?86)
+        ;;
+    *)
+        echo "Unsupported hardware platform." 1>&2
+        echo "Aborting..." 1>&2
+        exit 8
+        ;;
+esac
+
+# check if a DEB is already installed
+dpkg --help > /dev/null 2>&1
+if [ $? -ne 127 ]
+then
+    FILE_NUM=`find $src_dir -maxdepth 1 -name 'aksusbd_*.deb' | wc -l`
+    if [ $FILE_NUM -eq 1 ]
+    then
+        PKG_VER=`dpkg -l aksusbd 2>/dev/null | grep ^ii | awk '{print $3}'`
+        if [ ! -z "$PKG_VER" ]
+        then
+            FILE_VER=`echo $src_dir/aksusbd_*.deb | sed 's?.*/aksusbd_\(.*\)_.*deb?\1?'`
+            dpkg --compare-versions $PKG_VER lt $FILE_VER
+            if [ $? -eq 0 ]
+            then
+                echo "Update aksusbd DEB on this system." 1>&2
+                # We use --force-architecture for the cases when --add-architecture is not supported
+                dpkg -i --force-architecture $src_dir/aksusbd_*.deb 1>&2
+                if [ $? -ne 0 ]
+                then
+                    echo "Update aksusbd DEB failed" 1>&2
+                    exit 7
+                fi
+            else
+                echo "Package aksusbd DEB already installed" 1>&2
+            fi
+        else
+            echo "Install aksusbd DEB on this system." 1>&2
+            dpkg -i --force-architecture $src_dir/aksusbd_*.deb 1>&2
+            if [ $? -ne 0 ]
+            then
+                echo "Install aksusbd DEB failed" 1>&2
+                exit 7
+            fi
+        fi
+        copyvlib_installv2c
+        exit 0
+    elif [ $FILE_NUM -gt 1 ]
+    then
+        echo "Too many DEB packages in $src_dir/ directory" 1>&2
+        exit 6
+    else
+        echo "No DEB package in $src_dir/ directory" 1>&2
+        exit 6
+    fi
+fi
+
+# check is a RPM is already installed
+rpm --help > /dev/null 2>&1
+if [ $? -ne 127 ]
+then
+    FILE_NUM=`find $src_dir -maxdepth 1 -name 'aksusbd-*.rpm' | wc -l`
+    if [ $FILE_NUM -eq 1 ]
+    then
+        RPM_NAME=`rpm -qa 2>/dev/null | grep ^aksusbd | head -1`
+        if [ ! -z "$RPM_NAME" ]
+        then
+            echo "Update RPM on this system." 1>&2
+            # RPM doesn't report a different error for the 'already installed' case
+            # so, we just assume that if nothing is done, it's because it's already installed
+            # and we ignore the error code
+            rpm -Uvh $src_dir/aksusbd-*.rpm 1>&2
+        else
+            echo "Install RPM on this system." 1>&2
+            rpm -ivh $src_dir/aksusbd-*.rpm 1>&2
+            if [ $? -ne 0 ]
+            then
+                echo "Install aksusbd RPM failed" 1>&2
+                exit 7
+            fi
+        fi
+        copyvlib_installv2c
+        exit 0
+    elif [ $FILE_NUM -gt 1 ]
+    then
+        echo "Too many RPM packages in $src_dir/ directory" 1>&2
+        exit 6
+    else
+        echo "No RPM package in $src_dir/ directory" 1>&2
+        exit 6
+    fi
+fi
+
+echo "Copy AKSUSB daemon to $dest_dir ..."
+install -c -m 555 -g root -o root $src_dir/aksusbd $dest_dir
+if [ $? -gt 0 ]
+then
+    exit $?
+fi
+
+echo "Copy WINEHASP daemon to $dest_dir ..."
+install -c -m 555 -g root -o root $src_dir/winehasp $dest_dir
+if [ $? -gt 0 ]
+then
+    exit $?
+fi
+
+echo "Copy HASPLMD daemon to $dest_dir ..."
+install -c -m 555 -g root -o root $src_dir/hasplmd $dest_dir
+if [ $? -gt 0 ]
+then
+    exit $?
+fi
+
+echo "Copy start-up script to $script_dir ..."
+install -c -m 555 -g root -o root $src_dir/aksusbd.rc $script_dir/aksusbd
+
+if [ -d /etc/udev/rules.d ]
+then
+    # remove any previous versions of the rules file, as it may have a different name
+    rm -f /etc/udev/rules.d/*-hasp.rules
+    # install the new file
+    install -c -m 644 -g root -o root $src_dir/hasp.rules /etc/udev/rules.d/80-hasp.rules
+else
+    echo "WARNING! /etc/udev/rules.d does not exist. Is UDEV available?"
+    echo "Without UDEV it won't be possible to access Sentinel USB devices!"
+fi
+
+# check if at least one of udev and usbfs is available
+if [ ! -d /etc/udev/rules.d -a ! -f /proc/bus/usb/devices ]
+then
+    echo "WARNING! /proc/bus/usb/devices not found. Is USBFS mounted?"
+    echo "Without both UDEV and USBFS it won't be possible to access HASP USB devices!"
+fi
+
+echo "Link HASP SRM runtime environment startup script to system startup folder"
+
+# startup link for runlevels 2,3,5
+if [ -d $startup_dir/rc2.d ] ; then
+    ln -sf $script_dir/aksusbd $startup_dir/rc2.d/S23aksusbd
+fi
+if [ -d $startup_dir/rc3.d ] ; then
+    ln -sf $script_dir/aksusbd $startup_dir/rc3.d/S23aksusbd
+fi
+if [ -d $startup_dir/rc4.d ] ; then
+    ln -sf $script_dir/aksusbd $startup_dir/rc4.d/S23aksusbd
+fi
+if [ -d $startup_dir/rc5.d ] ; then
+    ln -sf $script_dir/aksusbd $startup_dir/rc5.d/S23aksusbd
+fi
+
+# kill old versions, no need to use here the -f argument
+pgrep "hasplmd|winehasp|aksusbd" >/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "Killing already running daemons..."
+    sh $script_dir/aksusbd stop
+fi
+
+echo "Starting HASP SRM runtime environment..."
+sh $script_dir/aksusbd start
+
+copyvlib_installv2c
+
+echo "Done"

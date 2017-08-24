@@ -1,0 +1,12 @@
+[c7]
+# Packages for Cloudera CDH, Version 5, on RedHat or CentOS 7 x86_64           	  
+name=CentOS 7.2.1511
+baseurl=http://HOST:18880/CentOS7/
+enabled=1
+gpgcheck=0
+
+[cm5]
+name=CM5
+baseurl=http://HOST:18880/cm/5/
+enabled=1
+gpgcheck=0

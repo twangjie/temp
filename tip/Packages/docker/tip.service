@@ -1,0 +1,16 @@
+[Unit]
+Description=TIP docker service
+Documentation=https://www.dccs.com.cn
+After=network.target docker.service
+
+[Service]
+Type=simple
+ExecStart=/bin/bash /opt/dccs/tip/tip.sh start
+ExecReload=/bin/bash /opt/dccs/tip/tip.sh restart
+ExecStop=/bin/bash /opt/dccs/tip/tip.sh stop
+PrivateTmp=True
+TimeoutSec=120
+
+[Install]
+WantedBy=multi-user.target
+

@@ -8,12 +8,20 @@
 #notes      :
 #==============================================================================
 
-currentTime=`date "+%Y%m%d%H%M%S"`
-
 LANG="en_US.UTF-8"
 LANGUAGE="en_US:en"
 
 alias cp='cp'
+
+temp=""
+currentTime=`date "+%Y-%m-%d %H:%M:%S"`
+echo "Current Time is $currentTime"
+read -p "Please input a new time(format: yyyy-MM-dd hh:mm:ss): " temp
+if [ "$temp" != "" ]; then
+    echo "$temp"
+    date -s "$temp"
+    hwclock -w
+fi
 
 rm -f /root/anaconda-ks.cfg
 rm -fr /var/log/anaconda
