@@ -133,11 +133,15 @@ function init_master {
     impala-shell -f $instroot/tip/tip-impala.sql
     impala-shell -q "invalidate metadata;show databases;show tables in tip;use tip;select is_privilege_plate('a');"
 
+    sudo -u hdfs hadoop fs -mkdir -p /user/hive/warehouse/cache.db
+    sudo -u hdfs hadoop fs -chown impala:hive /user/hive/warehouse/cache.db
+    sudo -u hdfs hadoop fs -chmod -R 777 /user/hive/warehouse/cache.db
+    
     echo ""
     echo $splitter
 
     #初始化flume
-    sudo -u hdfs hadoop fs -mkdir -p  /flume/tip
+    sudo -u hdfs hadoop fs -mkdir -p /flume/tip
     sudo -u hdfs hadoop fs -chown -R impala:impala /flume/tip
     
     echo ""
