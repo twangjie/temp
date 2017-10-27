@@ -932,6 +932,8 @@ function init_tip_components {
     docker exec tipslave1 bash -c "hive -f /tmp/tip-impala-cache.sql"
     docker exec tipslave1 bash -c "impala-shell -q 'invalidate metadata;show databases;show tables in tip;'"
     
+    docker exec tipslave1 bash -c "kafka-topics --create --zookeeper tipslave1:2181,tipslave2:2181,tipslave3:2181 --replication-factor 1 --partitions 4  --topic tip_json"
+    
     # 初始化tip服务
     
     print_title "init tip restful serive"

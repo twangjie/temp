@@ -88,7 +88,8 @@ INSERT INTO `config` (`key`,`val`,`comment`) VALUES
   ('nesf.service.cacheExpire','600',NULL),
   ('nesf.service.dataLimit','2000000',NULL),
   ('nesf.service.hbaseZkQuorum','tipslave1,tipslave2,tipslave3',NULL),
-  ('nesf.service.hbaseZkClientPort','2181',NULL);
+  ('nesf.service.hbaseZkClientPort','2181',NULL),
+  ('kafka.bootstrap-servers','tipslave1:9092,tipslave2:9092,tipslave3:9092',NULL);
 /*!40000 ALTER TABLE `config` ENABLE KEYS */;
 
 
@@ -109,7 +110,7 @@ CREATE TABLE `lock` (
 
 /*!40000 ALTER TABLE `lock` DISABLE KEYS */;
 INSERT INTO `lock` (`version`,`updated_time`) VALUES 
- (14511,'2017-01-20 10:00:00');
+ (1,'2017-01-20 10:00:00');
 /*!40000 ALTER TABLE `lock` ENABLE KEYS */;
 
 

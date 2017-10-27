@@ -27,6 +27,7 @@ masterflag="N"
 flumenodes_file=$instroot/flumenodes.txt
 impaladnodes_file=$instroot/impaladnodes.txt
 zookeepernodes_file=$instroot/zookeepernodes.txt
+kafkanodes_file=$instroot/kafkanodes.txt
 hosts_file=$instroot/hosts.txt
 
 my_ip=`cat $instroot/ip.txt`
@@ -100,6 +101,7 @@ function parse_cm_cluster_info {
     impala_dbhost=`cat $impaladnodes_file`
     flumeagents=`cat $flumenodes_file`
     hostIpAddrs=`cat $hosts_file`
+    kafkaBrokers=`cat $kafkanodes_file`
 }
 
 function init_master {
@@ -157,13 +159,14 @@ function init_master {
     echo "use tip;" > $tip_update_sql_file
     echo "update config set val='$impala_dbhost' where \`key\`='dccs.reset.config.impala.jdbc.host';" >> $tip_update_sql_file
     echo "update config set val='$impala_port' where \`key\`='dccs.reset.config.impala.jdbc.port';" >> $tip_update_sql_file
-    echo "update config set val='jdbc:impala://$impala_dbhost:$impala_port/tip' where \`key\`='nesf.datasource.impala.url';" >> $tip_update_sql_file
+    echo "update config set val='jdbc:impala://$impala_dbhost:$impala_port/tip;UseNativeQuery=1;PreparedMetaLimitZero=0' where \`key\`='nesf.datasource.impala.url';" >> $tip_update_sql_file
     echo "update config set val='$zk_host' where \`key\`='dccs.reset.config.hbase.zookeeper.quorum';" >> $tip_update_sql_file
     echo "update config set val='$zk_host' where \`key\`='nesf.service.hbaseZkQuorum';" >> $tip_update_sql_file
     echo "update config set val='jdbc:mysql://$mysql_dbhost:3306/tip' where \`key\`='nesf.datasource.task.url';" >> $tip_update_sql_file
     echo "update config set val='jdbc:mysql://$mysql_dbhost:3306/tip' where \`key\`='nesf.datasource.task.url';" >> $tip_update_sql_file
     echo "update config set val='tip' where \`key\`='nesf.datasource.task.username';" >> $tip_update_sql_file
     echo "update config set val='tip' where \`key\`='nesf.datasource.task.password';" >> $tip_update_sql_file
+    echo "update config set val='$kafkaBrokers' where \`key\`='kafka.bootstrap-servers';" >> $tip_update_sql_file
 
     mysql -utip -ptip -h$mysql_dbhost < $tip_update_sql_file
     rm -f $tip_update_sql_file
@@ -180,7 +183,6 @@ function init_master {
     echo ""
     echo $splitter
     echo "Config the flume proxy..."
-
 
     echo "upstream flumeagents {" > $temp_file
     echo $flumeagents | awk '{split($0,s,",");{for(i in s)print "server " s[i] ":11111 max_fails=3 fail_timeout=5s weight=4;"}}' >> $temp_file
@@ -203,7 +205,7 @@ function init_master {
     echo "}" >> $temp_file
     echo "" >> $temp_file
 
-    echo "upstream rests2 {" >> $temp_file
+    echo "upstream rests_monctrl {" >> $temp_file
     echo $hostIpAddrs | awk '{split($0,s,",");{for(i in s)print "    server " s[i] ":58080 max_fails=3 fail_timeout=5s weight=4;"}}' >> $temp_file
     echo "    keepalive 10;" >> $temp_file
     echo "}" >> $temp_file
@@ -309,6 +311,12 @@ function init_tip_service {
     rm -fr /var/log/flume-ng
     mkdir -p /var/log/flume-ng
     chown -R impala:impala /var/log/flume-ng
+    
+    echo ""
+    echo $splitter
+    # 初始化Kafka topic
+    kafka-topics --create --zookeeper $zk_host --replication-factor 1 --partitions 4  --topic tip_json
+    kafka-topics --list --zookeeper $zk_host
 
     echo ""
     echo $splitter

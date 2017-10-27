@@ -5,7 +5,7 @@
       "name": "cluster",
       "displayName": "TIP",
       "version": "CDH5",
-      "fullVersion": "5.11.0",
+      "fullVersion": "5.12.1",
       "services": [
         {
           "name": "zookeeper",
@@ -1662,7 +1662,7 @@
                 "items": [
                   {
                     "name": "agent_config_file",
-                    "value": "#agent config\ntip_agent.sources=tip_http_source\t\ntip_agent.channels=text_csv_channel image_channel\ntip_agent.sinks=text_csv_sink image_sink\n\n#sources\ntip_agent.sources.tip_http_source.type=com.dccs.platform.flume.source.TipHTTPSource\ntip_agent.sources.tip_http_source.handler=com.dccs.platform.flume.source.TipSourceHandler\ntip_agent.sources.tip_http_source.bind=0.0.0.0\ntip_agent.sources.tip_http_source.port=11111\t\ntip_agent.sources.tip_http_source.channels=text_csv_channel image_channel \t\n\n# channel selector configuration\ntip_agent.sources.tip_http_source.selector.type = multiplexing\ntip_agent.sources.tip_http_source.selector.header = TIP-DATA-TYPE\ntip_agent.sources.tip_http_source.selector.mapping.CSV = text_csv_channel\ntip_agent.sources.tip_http_source.selector.mapping.IMAGE = image_channel\n#tip_agent.sources.tip_http_source.selector.default = mem-channel-1\n\n#tip_agent.sources.hs.interceptors=i1\n#tip_agent.sources.hs.interceptors.i1.type=com.dccs.platform.flume.interceptor.TipInterceptor$Builder\n\n# TIP CSV channel\ntip_agent.channels.text_csv_channel.type=com.dccs.platform.flume.channel.TipChannel\ntip_agent.channels.text_csv_channel.checkpointDir = /data/flume/tip/csv/checkpoint\ntip_agent.channels.text_csv_channel.dataDirs = /data/flume/tip/csv/data\n\n#Spillable memory channel (http://flume.apache.org/FlumeUserGuide.html#spillable-memory-channel)\ntip_agent.channels.image_channel.type=com.dccs.platform.flume.channel.TipChannel\n#Maximum number of events stored in memory queue. To disable use of in-memory queue, set this to zero.\n#tip_agent.channels.image_channel.memoryCapacity=1000\n#Maximum number of events stored in overflow disk (i.e File channel). To disable use of overflow, set this to zero.\n#tip_agent.channels.image_channel.overflowCapacity=10000000\n#The number of seconds to wait before enabling disk overflow when memory fills up.\n#tip_agent.channels.image_channel.overflowTimeout=3\n#Maximum bytes of memory allowed as a sum of all events in the memory queue.\n#tip_agent.channels.image_channel.byteCapacity=419430400\n#tip_agent.channels.image_channel.transactionCapacity=100\ntip_agent.channels.image_channel.checkpointDir = /data/flume/tip/image/checkpoint\ntip_agent.channels.image_channel.dataDirs = /data/flume/tip/image/data\n\n# TipHdfsSink\ntip_agent.sinks.text_csv_sink.type = com.dccs.platform.flume.sink.TipHdfsSink\ntip_agent.sinks.text_csv_sink.channel = text_csv_channel\n#tip_agent.sinks.text_csv_sink.serializer=com.dccs.platform.flume.serializer.TipCSVSerializer\ntip_agent.sinks.text_csv_sink.hdfs.path =/flume/tip\ntip_agent.sinks.text_csv_sink.hdfs.batchSize = 100\ntip_agent.sinks.text_csv_sink.hdfs.rollInterval=60\ntip_agent.sinks.text_csv_sink.hdfs.rollSize=0\ntip_agent.sinks.text_csv_sink.hdfs.rollCount=0\ntip_agent.sinks.text_csv_sink.hdfs.useLocalTimeStamp = false\ntip_agent.sinks.text_csv_sink.hdfs.fileType = DataStream\ntip_agent.sinks.text_csv_sink.hdfs.maxOpenFiles=5000\ntip_agent.sinks.text_csv_sink.hdfs.closeTries=3\ntip_agent.sinks.text_csv_sink.zookeeperQuorum=tipslave1,tipslave2,tipslave3\ntip_agent.sinks.text_csv_sink.tip.stage1CombineThreshold=100\ntip_agent.sinks.text_csv_sink.tip.stage2CombineThreshold=50\n\n#Use dccs Hbase sink\ntip_agent.sinks.image_sink.channel=image_channel\n#tip_agent.sinks.image_sink.type=asynchbase\ntip_agent.sinks.image_sink.type=com.dccs.platform.flume.sink.TipImageSink\ntip_agent.sinks.image_sink.serializer=com.dccs.platform.flume.serializer.AsyncTipImageHBaseSerializer\n#tip_agent.sinks.image_sink.table=tip_image\n#tip_agent.sinks.image_sink.columnFamily=cf\n#tip_agent.sinks.image_sink.batchSize = 100\ntip_agent.sinks.image_sink.zookeeperQuorum=tipslave1,tipslave2,tipslave3\ntip_agent.sinks.image_sink.serializer.zookeeperQuorum=tipslave1,tipslave2,tipslave3\n#tip_agent.sinks.image_sink.serializer.skipWAL=false\n",
+                    "value": "#agent config\ntip_agent.sources=tip_http_source\ntip_agent.channels=text_json_channel text_csv_channel image_channel tip_plate_channel\ntip_agent.sinks=text_csv_sink text_json_sink image_sink tip_plate_sink\n\n#sources\ntip_agent.sources.tip_http_source.type=com.dccs.platform.flume.source.TipHTTPSource\ntip_agent.sources.tip_http_source.handler=com.dccs.platform.flume.source.TipSourceHandler\ntip_agent.sources.tip_http_source.bind=0.0.0.0\ntip_agent.sources.tip_http_source.port=11111\ntip_agent.sources.tip_http_source.channels=text_json_channel text_csv_channel image_channel tip_plate_channel\n\n# channel selector configuration\ntip_agent.sources.tip_http_source.selector.type = multiplexing\ntip_agent.sources.tip_http_source.selector.header = TIP-DATA-TYPE\ntip_agent.sources.tip_http_source.selector.mapping.CSV = text_csv_channel\ntip_agent.sources.tip_http_source.selector.mapping.JSON = text_json_channel\ntip_agent.sources.tip_http_source.selector.mapping.IMAGE = image_channel\ntip_agent.sources.tip_http_source.selector.mapping.PLATE = tip_plate_channel\n\n# TIP JSON channel\ntip_agent.channels.text_json_channel.type=com.dccs.platform.flume.channel.TipChannel\ntip_agent.channels.text_json_channel.checkpointDir = /data/flume/tip/json/checkpoint\ntip_agent.channels.text_json_channel.dataDirs = /data/flume/tip/json/data\n\n# TIP CSV channel\ntip_agent.channels.text_csv_channel.type=com.dccs.platform.flume.channel.TipChannel\ntip_agent.channels.text_csv_channel.checkpointDir = /data/flume/tip/csv/checkpoint\ntip_agent.channels.text_csv_channel.dataDirs = /data/flume/tip/csv/data\n\n# TIP PLATE channel\ntip_agent.channels.tip_plate_channel.type=com.dccs.platform.flume.channel.TipChannel\ntip_agent.channels.tip_plate_channel.checkpointDir = /data/flume/tip/plate/checkpoint\ntip_agent.channels.tip_plate_channel.dataDirs = /data/flume/tip/plate/data\n\ntip_agent.channels.image_channel.type=com.dccs.platform.flume.channel.TipChannel\ntip_agent.channels.image_channel.checkpointDir = /data/flume/tip/image/checkpoint\ntip_agent.channels.image_channel.dataDirs = /data/flume/tip/image/data\n\n# TipHdfsSink\ntip_agent.sinks.text_csv_sink.type = com.dccs.platform.flume.sink.TipHdfsSink\ntip_agent.sinks.text_csv_sink.channel = text_csv_channel\ntip_agent.sinks.text_csv_sink.hdfs.path =/flume/tip\ntip_agent.sinks.text_csv_sink.hdfs.batchSize = 100\ntip_agent.sinks.text_csv_sink.hdfs.rollInterval=60\ntip_agent.sinks.text_csv_sink.zookeeperQuorum=tipslave1,tipslave2,tipslave3\ntip_agent.sinks.text_csv_sink.tip.stage1CombineThreshold=50\ntip_agent.sinks.text_csv_sink.tip.stage2CombineThreshold=20\n\ntip_agent.sinks.text_json_sink.type = org.apache.flume.sink.kafka.KafkaSink\ntip_agent.sinks.text_json_sink.topic = tip_json\ntip_agent.sinks.text_json_sink.brokerList = tipslave1:9092,tipslave2:9092,tipslave3:9092\ntip_agent.sinks.text_json_sink.channel = text_json_channel\ntip_agent.sinks.text_json_sink.batchSize = 20\n\n#Use TIP plate sink\ntip_agent.sinks.tip_plate_sink.channel=tip_plate_channel\ntip_agent.sinks.tip_plate_sink.type=com.dccs.platform.flume.sink.TipPlateSink\ntip_agent.sinks.tip_plate_sink.zookeeperQuorum=tipslave1,tipslave2,tipslave3\n\n#Use dccs Hbase sink\ntip_agent.sinks.image_sink.channel=image_channel\ntip_agent.sinks.image_sink.type=com.dccs.platform.flume.sink.TipImageSink\ntip_agent.sinks.image_sink.serializer=com.dccs.platform.flume.serializer.AsyncTipImageHBaseSerializer\ntip_agent.sinks.image_sink.zookeeperQuorum=tipslave1,tipslave2,tipslave3\ntip_agent.sinks.image_sink.serializer.zookeeperQuorum=tipslave1,tipslave2,tipslave3\n",
                     "sensitive": false
                   },
                   {
@@ -1694,12 +1694,149 @@
               }
             }
           ]
+        },
+        {
+          "name": "kafka",
+          "type": "KAFKA",
+          "config": {
+            "items": [
+              {
+                "name": "zookeeper_service",
+                "value": "zookeeper",
+                "sensitive": false
+              }
+            ]
+          },
+          "roles": [
+            {
+              "name": "kafka-KAFKA_BROKER-6bdb14dcbc62dea8317ab4c7bb1e69fe",
+              "type": "KAFKA_BROKER",
+              "hostRef": {
+                "hostId": "5e881dda-3536-46f1-a7a5-4b6411ce2e2b"
+              },
+              "config": {
+                "items": [
+                  {
+                    "name": "broker.id",
+                    "value": "277",
+                    "sensitive": false
+                  },
+                  {
+                    "name": "role_jceks_password",
+                    "value": "7kaluogit9yyquc0aah5311at",
+                    "sensitive": true
+                  }
+                ]
+              },
+              "roleConfigGroupRef": {
+                "roleConfigGroupName": "kafka-KAFKA_BROKER-BASE"
+              }
+            },
+            {
+              "name": "kafka-KAFKA_BROKER-8c3ea821c2c56ec12a97d09818242c88",
+              "type": "KAFKA_BROKER",
+              "hostRef": {
+                "hostId": "0f418874-d221-4a0a-9eab-42002c341dae"
+              },
+              "config": {
+                "items": [
+                  {
+                    "name": "broker.id",
+                    "value": "278",
+                    "sensitive": false
+                  },
+                  {
+                    "name": "role_jceks_password",
+                    "value": "d5fcykv1rb5d8f02rbxasub1z",
+                    "sensitive": true
+                  }
+                ]
+              },
+              "roleConfigGroupRef": {
+                "roleConfigGroupName": "kafka-KAFKA_BROKER-BASE"
+              }
+            },
+            {
+              "name": "kafka-KAFKA_BROKER-b8a233ffc7d01eeb211f51e9d89d6100",
+              "type": "KAFKA_BROKER",
+              "hostRef": {
+                "hostId": "85d34e4b-a7ad-4d1e-b71e-d7bc4980e712"
+              },
+              "config": {
+                "items": [
+                  {
+                    "name": "broker.id",
+                    "value": "279",
+                    "sensitive": false
+                  },
+                  {
+                    "name": "role_jceks_password",
+                    "value": "2cvpwblb8hkzfwjpclk4p8kgb",
+                    "sensitive": true
+                  }
+                ]
+              },
+              "roleConfigGroupRef": {
+                "roleConfigGroupName": "kafka-KAFKA_BROKER-BASE"
+              }
+            }
+          ],
+          "displayName": "Kafka",
+          "roleConfigGroups": [
+            {
+              "name": "kafka-GATEWAY-BASE",
+              "displayName": "Gateway Default Group",
+              "roleType": "GATEWAY",
+              "base": true,
+              "serviceRef": {
+                "clusterName": "cluster",
+                "serviceName": "kafka"
+              },
+              "config": {
+                "items": []
+              }
+            },
+            {
+              "name": "kafka-KAFKA_BROKER-BASE",
+              "displayName": "Kafka Broker Default Group",
+              "roleType": "KAFKA_BROKER",
+              "base": true,
+              "serviceRef": {
+                "clusterName": "cluster",
+                "serviceName": "kafka"
+              },
+              "config": {
+                "items": []
+              }
+            },
+            {
+              "name": "kafka-KAFKA_MIRROR_MAKER-BASE",
+              "displayName": "Kafka MirrorMaker Default Group",
+              "roleType": "KAFKA_MIRROR_MAKER",
+              "base": true,
+              "serviceRef": {
+                "clusterName": "cluster",
+                "serviceName": "kafka"
+              },
+              "config": {
+                "items": []
+              }
+            }
+          ]
         }
       ],
       "parcels": [
         {
           "product": "CDH",
-          "version": "5.11.0-1.cdh5.11.0.p0.34",
+          "version": "CDH-5.12.1-1.cdh5.12.1.p0.3",
+          "stage": "UNDISTRIBUTING",
+          "clusterRef": {
+            "clusterName": "cluster"
+          }
+        },
+        {
+          "product": "KAFKA",
+          "version": "2.2.0-1.2.2.0.p0.68",
           "stage": "UNDISTRIBUTING",
           "clusterRef": {
             "clusterName": "cluster"
@@ -1803,10 +1940,10 @@
     }
   ],
   "versionInfo": {
-    "version": "5.11.0",
+    "version": "5.12.1",
     "buildUser": "jenkins",
-    "buildTimestamp": "20170412-1255",
-    "gitHash": "70cb1442626406432a6e7af5bdf206a384ca3f98",
+    "buildTimestamp": "20170818-0807",
+    "gitHash": "9bdee611802535491d400e03c98ef694a2c77d0a",
     "snapshot": false
   },
   "managementService": {

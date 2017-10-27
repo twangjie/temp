@@ -88,7 +88,8 @@ INSERT INTO `config` (`key`,`val`,`comment`) VALUES
   ('nesf.service.cacheExpire','600',NULL),
   ('nesf.service.dataLimit','2000000',NULL),
   ('nesf.service.hbaseZkQuorum','192.168.35.103',NULL),
-  ('nesf.service.hbaseZkClientPort','2181',NULL);
+  ('nesf.service.hbaseZkClientPort','2181',NULL),
+  ('kafka.bootstrap-servers','host02:9092,host03:9092,host04:9092',NULL);
 /*!40000 ALTER TABLE `config` ENABLE KEYS */;
 
 

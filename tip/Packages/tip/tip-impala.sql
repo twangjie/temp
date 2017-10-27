@@ -7,3 +7,8 @@ create table if not exists tip.vehicleInfo (Id string, Speed int, TimePlate stri
 
 create function if not exists tip.is_privilege_plate(string) returns BOOLEAN location '/user/impala/tip/so/libTipUDFS.1.0.1.so' symbol='IsPrivilegePlate';
 create function if not exists tip.tip_id_concat(string, string ...) returns string location '/user/impala/tip/so/libTipUDFS.1.0.1.so' symbol='TIPIDConcat';
+
+
+drop view if exists vwalarmdetails;
+create view vwalarmdetails as select a.id as alarmid,t.taskid,t.type as tasktype,t.creatorid,t.creatorname,t.`comment` as taskcomment,t.starttime,t.endtime,t.closed, v.id,v.timeplate,v.plate,v.platecolor,v.platetype, v.vehiclemodel,v.vehiclebrand,v.vehiclesubmodel,v.vehicletype,v.colorcar_0,v.colorcar_1,v.deviceuniquecode from tip.monctrl_alarm a join tip.monctrl_task t on a.taskid=t.taskid join vehicleinfo_alarm v on a.vehicleinfoid=v.id;
+

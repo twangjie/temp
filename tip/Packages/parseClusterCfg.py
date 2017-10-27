@@ -20,6 +20,7 @@ hosts={}
 flumeHosts=[]
 impalaHosts=[]
 zookeeperHosts=[]
+kafkaBrokers=[]
 
 for host in hostsCfg['items']:
     hosts[host['hostId']] = host["ipAddress"]
@@ -38,10 +39,16 @@ for service in clusterCfg['items'][0]['services']:
             if role['type'] == 'IMPALAD':
                 impalaHosts.append(hosts[role['hostRef']['hostId']])
 
+    if service['type'] == "KAFKA":
+        for role in service['roles']:
+            if role['type'] == 'KAFKA_BROKER':
+                kafkaBrokers.append(hosts[role['hostRef']['hostId']])
+                
 print hosts
 print zookeeperHosts
 print flumeHosts
 print impalaHosts
+print kafkaBrokers
 
 outfile=open('hosts.txt','w')
 i=0
@@ -67,6 +74,15 @@ for ip in flumeHosts:
     outfile.write(ip)
     i=i+1
     if i != len(flumeHosts):
+        outfile.write(",")
+outfile.close()
+
+i=0
+outfile=open('kafkanodes.txt','w')
+for ip in kafkaBrokers:
+    outfile.write(ip+":9092")
+    i=i+1
+    if i != len(kafkaBrokers):
         outfile.write(",")
 outfile.close()
 
