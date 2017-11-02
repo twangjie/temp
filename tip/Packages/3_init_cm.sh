@@ -113,7 +113,19 @@ function init_master(){
     external_netmask="255.255.255.0"
     external_gateway=""
     external_dns=""
-    netconf=/etc/sysconfig/network-scripts/ifcfg-bond0
+    
+    devs=`nmcli dev status |awk '{if($2=="ethernet" && $3=="connected") print $1}'`
+    lines=`echo $devs |awk -F ' ' '{print NF}'`
+
+    if [[ $lines -eq 1 ]]; then 
+        netconf=/etc/sysconfig/network-scripts/ifcfg-$devs
+    else
+        netconf=/etc/sysconfig/network-scripts/ifcfg-bond0
+    fi
+    
+    echo $devs
+    echo $netconf
+    
     cp $netconf $backupdir/
     
     read -p "Please input the external ip: " temp

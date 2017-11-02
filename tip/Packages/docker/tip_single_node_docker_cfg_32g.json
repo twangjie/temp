@@ -1704,7 +1704,7 @@
           },
           "roles": [
             {
-              "name": "kafka-KAFKA_BROKER-6bdb14dcbc62dea8317ab4c7bb1e69fe",
+              "name": "kafka-KAFKA_BROKER-47976c57372571ddde204ed57ff6cf9e",
               "type": "KAFKA_BROKER",
               "hostRef": {
                 "hostId": "5e881dda-3536-46f1-a7a5-4b6411ce2e2b"
@@ -1728,7 +1728,7 @@
               }
             },
             {
-              "name": "kafka-KAFKA_BROKER-8c3ea821c2c56ec12a97d09818242c88",
+              "name": "kafka-KAFKA_BROKER-a217b2f9b38038e2ba3b0fdd6ba67942",
               "type": "KAFKA_BROKER",
               "hostRef": {
                 "hostId": "0f418874-d221-4a0a-9eab-42002c341dae"
@@ -1752,7 +1752,7 @@
               }
             },
             {
-              "name": "kafka-KAFKA_BROKER-b8a233ffc7d01eeb211f51e9d89d6100",
+              "name": "kafka-KAFKA_BROKER-6ae8becf9198da9df1be10a36f9aef6a",
               "type": "KAFKA_BROKER",
               "hostRef": {
                 "hostId": "85d34e4b-a7ad-4d1e-b71e-d7bc4980e712"

@@ -76,11 +76,19 @@ echo "*  hard  nproc  1048576" >> /etc/security/limits.conf
 echo "*  soft  nofile  1048576" >> /etc/security/limits.conf
 echo "*  hard  nofile  1048576" >> /etc/security/limits.conf
 
-bondcfg=/etc/sysconfig/network-scripts/ifcfg-bond0
+echo ""
+nmcli dev status
+echo ""
+devs=`nmcli dev status |awk '{if($2=="ethernet") print $1}'`
+bondcfg=/etc/sysconfig/network-scripts/ifcfg-$devs
 if [ -f $bondcfg ]; then
     cp $bondcfg $backupdir/
-    sed -i 's/BOOTPROTO=.*/BOOTPROTO=static/' $bondcfg 
+    sed -i 's/BOOTPROTO=.*/BOOTPROTO=static/' $bondcfg
 fi
+echo ""
+nmcli dev status
+ip a
+echo ""
 
 # 初始化hosts文件
 hostfile=/etc/hosts
